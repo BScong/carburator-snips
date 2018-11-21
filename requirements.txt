@@ -3,3 +3,4 @@ hermes-python>=0.1
 requests
 
 # More dependency goes here..
+googlemaps==3.0.2
