@@ -20,5 +20,7 @@ It fetches the nearest gas station and tries to fetch the price for the correspo
  - Ask the user for its location (and convert it to longitude/latitude)
  - Save preferences for user (oil_type, location)
  - Being able to ask for the gas station precise address (provided by API)
- - Being able to ask for the gas station opening hours (provided by API)
+ - Being able to ask for the gas station opening hours (provided by API / Update: not provided anymore by API)
  - Being able to ask for the gas station services (provided by API)
+ - Add custom slot type for French Cities for setCity intent
+ - Maybe convert setCity intent to setAddress to be more precise and accurate?

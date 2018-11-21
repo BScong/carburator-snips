@@ -34,6 +34,18 @@ class Carburator(object):
         self.start_blocking()
 
     # --> Sub callback function, one per intent
+    def setOilType_callback(self, hermes, intent_message):
+        return
+        
+    def getServices_callback(self, hermes, intent_message):
+        return
+
+    def getStationAddress_callback(self, hermes, intent_message):
+        return
+
+    def setCity_callback(self, hermes, intent_message):
+        return
+
     def askPrice_callback(self, hermes, intent_message):
         print(intent_message)
         # terminate the session first if not continue
@@ -82,6 +94,14 @@ class Carburator(object):
         print(coming_intent)
         if 'askPrice' in coming_intent:
             self.askPrice_callback(hermes, intent_message)
+        elif 'setOilType' in coming_intent:
+            self.setOilType_callback(hermes, intent_message)
+        elif 'setCity' in coming_intent:
+            self.setCity_callback(hermes, intent_message)
+        elif 'getServices' in coming_intent:
+            self.getServices_callback(hermes, intent_message)
+        elif 'getStationAddress' in coming_intent:
+            self.getStationAddress_callback(hermes, intent_message)
         # more callback and if condition goes here...
 
     # --> Register callback function and start MQTT
