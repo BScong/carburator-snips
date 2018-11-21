@@ -25,7 +25,7 @@ def getLonLat(gmaps, city):
             return (geocode_result[0]['geometry']['location']['lng'],a[0]['geometry']['location']['lat'])
         else:
             raise Error('No API key specified');
-    except Exception e:
+    except Exception as e:
         raise e
 
 class Carburator(object):
@@ -162,7 +162,7 @@ class Carburator(object):
     # --> Register callback function and start MQTT
     def start_blocking(self):
         with Hermes(MQTT_ADDR) as h:
-            h.subscribe_intents(self.master_intent_callback).start()
+            h.subscribe_intents(self.master_intent_callback).subscribe_intent('setOilType', setOilType_callback).start()
 
 if __name__ == "__main__":
     Carburator()
