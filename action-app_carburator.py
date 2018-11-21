@@ -22,7 +22,7 @@ def getLonLat(gmaps, city):
     try:
         if gmaps:
             geocode_result = gmaps.geocode(city)
-            return geocode_result
+            return (geocode_result[0]['geometry']['location']['lng'],a[0]['geometry']['location']['lat'])
         else:
             raise Error('No API key specified');
     except Exception e:
@@ -93,9 +93,6 @@ class Carburator(object):
 
 
     def askPrice_callback(self, hermes, intent_message):
-        # terminate the session first if not continue
-        hermes.publish_end_session(intent_message.session_id, "")
-
         # Find oil type
         oil_type = None
         if intent_message.slots.oilType:
@@ -108,7 +105,8 @@ class Carburator(object):
             oil_type = self.oil_type
         else:
             ## trigger setOilType intent
-            continue
+            hermes.publish_continue_session(intent_message.session_id, 'Do you want the price for Gasoline or Diesel?', ['setOilType'])
+
 
         # Find location
         lon, lat = 0, 0
@@ -123,7 +121,7 @@ class Carburator(object):
             lon, lat = self.longitude, self.latitude
         else:
             ## trigger setCity intent
-            continue
+            hermes.publish_continue_session(intent_message.session_id, 'For which place do you want the prices?', ['setCity'])
 
         try:
             station_data = requests.get(CARBURATOR_API_URL+'stations/lon/'+str(longitude)+'/lat/'+str(latitude)+'?limit=1').json()
@@ -142,6 +140,8 @@ class Carburator(object):
 
         hermes.publish_start_session_notification(intent_message.site_id, "The " + str(oil_type) + ' is currently at ' + price + ' euros per liter.', "")
 
+        # terminate the session first if not continue
+        hermes.publish_end_session(intent_message.session_id, "")
 
     # --> Master callback function, triggered everytime an intent is recognized
     def master_intent_callback(self,hermes, intent_message):
