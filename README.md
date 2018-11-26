@@ -42,6 +42,20 @@ The location is converted to longitude/latitude by calling the [Google Maps Geoc
 Set the oil type for the current user. The slot is required.
 
 ## Examples
+ - *I live in Paris*
+ - Your city is now Paris.
+ - *Set my oil to Diesel*
+ - Your oil is now Diesel.
+ - *What are the gas prices?*
+ - The Diesel is currently at 1.43 euros per liter.
+ - *What's the address?*
+ - The gas station is at [address].
+ - *What are the services?*
+ - The services are: [services].
+
+
+
+
 
 
 ## Todo list and improvements
@@ -52,5 +66,9 @@ Set the oil type for the current user. The slot is required.
  - X Being able to ask for the gas station opening hours (provided by API / Update: not provided anymore by API)
  - ✓ Being able to ask for the gas station services (provided by API)
  - Add custom slot type for French Cities for setCity intent
+ - Save API data on the first call to re-use for getStationAddress and getServices calls (Address and Services won't change from one call to the other)
+ - Implement dialogues
+ - Fix geocoding bug
+ - For getStationAddress and getServices, call the setCity intent if no location is specified.
  - Maybe convert setCity intent to setAddress to be more precise and accurate?
  - Add analytics

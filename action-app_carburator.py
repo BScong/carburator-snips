@@ -22,9 +22,9 @@ def getLonLat(gmaps, city):
     try:
         if gmaps:
             geocode_result = gmaps.geocode(city)
-            return (geocode_result[0]['geometry']['location']['lng'],a[0]['geometry']['location']['lat'])
+            return (geocode_result[0]['geometry']['location']['lng'],geocode_result[0]['geometry']['location']['lat'])
         else:
-            raise Error('No API key specified');
+            raise Exception('No API key specified');
     except Exception as e:
         raise e
 
@@ -39,9 +39,10 @@ class Carburator(object):
             self.config = SnipsConfigParser.read_configuration_file(CONFIG_INI)
             self.gmaps = None
             try:
-                if self.config.get("secret").get("google_maps_API_key"):
-                    self.gmaps = googlemaps.Client(key=self.config.get("secret").get("google_maps_API_key"))
-            except:
+                if self.config.get("secret").get("google_maps_api_key"):
+                    self.gmaps = googlemaps.Client(key=self.config.get("secret").get("google_maps_api_key"))
+            except Exception as e:
+                print(e)
                 self.gmaps = None
         except :
             self.config = None
@@ -69,6 +70,7 @@ class Carburator(object):
         if oil_type is None:
             hermes.publish_start_session_notification(intent_message.site_id, "Error: no oil type was specified.", "")
             return
+        hermes.publish_start_session_notification(intent_message.site_id, "Your oil is now " + self.oil_type + ".", "")
 
     def setCity_callback(self, hermes, intent_message):
         if intent_message.slots.city:
@@ -78,9 +80,11 @@ class Carburator(object):
                 self.longitude = lon
                 self.latitude = lat
                 self.city = city
-            except:
+            except Exception as e:
+                print(e)
                 hermes.publish_start_session_notification(intent_message.site_id, "Error finding location", "")
                 return
+            hermes.publish_start_session_notification(intent_message.site_id, "Your city is now " + self.city + ".", "")
 
         return
 
@@ -98,7 +102,8 @@ class Carburator(object):
             for service in station_data[0]['services']:
                 list_services.append(service)
             services = ", ".join(list_services)
-        except:
+        except Exception as e:
+            print(e)
             hermes.publish_start_session_notification(intent_message.site_id, "Error: impossible to find services.", "")
             return
         hermes.publish_start_session_notification(intent_message.site_id, "The services are: " + services + ".", "")
@@ -114,8 +119,9 @@ class Carburator(object):
 
         try:
             station_data = requests.get(CARBURATOR_API_URL+'stations/lon/'+str(longitude)+'/lat/'+str(latitude)+'?limit=1').json()
-            address = station_data[0]['address'] + ', ' + station_data[0]['postcode'] + ', ' station_data[0]['city']
-        except:
+            address = station_data[0]['address'] + ', ' + station_data[0]['postcode'] + ', ' + station_data[0]['city']
+        except Exception as e:
+            print(e)
             hermes.publish_start_session_notification(intent_message.site_id, "Error: impossible to find address.", "")
             return
         hermes.publish_start_session_notification(intent_message.site_id, "The gas station is at " + address + ".", "")
@@ -154,13 +160,14 @@ class Carburator(object):
             hermes.publish_continue_session(intent_message.session_id, 'For which place do you want the prices?', ['setCity'])
 
         try:
+            print(CARBURATOR_API_URL+'stations/lon/'+str(longitude)+'/lat/'+str(latitude)+'?limit=1')
             station_data = requests.get(CARBURATOR_API_URL+'stations/lon/'+str(longitude)+'/lat/'+str(latitude)+'?limit=1').json()
             try:
                 prices = station_data[0]['prices']
                 if oil_type == 'gasoline':
                     price = prices['2']['value']
                 else:
-                    price = price['1']['value']
+                    price = prices['1']['value']
             except Exception as error:
                 hermes.publish_start_session_notification(intent_message.site_id, "Error: impossible to find gas price.", "")
                 return
