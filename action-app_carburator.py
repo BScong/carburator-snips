@@ -85,10 +85,40 @@ class Carburator(object):
         return
 
     def getServices_callback(self, hermes, intent_message):
-        return
+        # get location (lon lat)
+        if self.city != '':
+            longitude, latitude = self.longitude, self.latitude
+        else:
+            hermes.publish_start_session_notification(intent_message.site_id, 'Error: no location specified. Say "I live in" and then your city to specify your location.', "")
+            return
+
+        try:
+            station_data = requests.get(CARBURATOR_API_URL+'stations/lon/'+str(longitude)+'/lat/'+str(latitude)+'?limit=1').json()
+            list_services = []
+            for service in station_data[0]['services']:
+                list_services.append(service)
+            services = ", ".join(list_services)
+        except:
+            hermes.publish_start_session_notification(intent_message.site_id, "Error: impossible to find services.", "")
+            return
+        hermes.publish_start_session_notification(intent_message.site_id, "The services are: " + services + ".", "")
+
 
     def getStationAddress_callback(self, hermes, intent_message):
-        return
+        # get location (lon lat)
+        if self.city != '':
+            longitude, latitude = self.longitude, self.latitude
+        else:
+            hermes.publish_start_session_notification(intent_message.site_id, 'Error: no location specified. Say "I live in" and then your city to specify your location.', "")
+            return
+
+        try:
+            station_data = requests.get(CARBURATOR_API_URL+'stations/lon/'+str(longitude)+'/lat/'+str(latitude)+'?limit=1').json()
+            address = station_data[0]['address'] + ', ' + station_data[0]['postcode'] + ', ' station_data[0]['city']
+        except:
+            hermes.publish_start_session_notification(intent_message.site_id, "Error: impossible to find address.", "")
+            return
+        hermes.publish_start_session_notification(intent_message.site_id, "The gas station is at " + address + ".", "")
 
 
 
@@ -109,16 +139,16 @@ class Carburator(object):
 
 
         # Find location
-        lon, lat = 0, 0
+        longitude, latitude = 0, 0
         if intent_message.slots.city:
             try:
                 city = intent_message.slots.city.first().value.encode("utf-8")
-                lon, lat = getLonLat(self.gmaps, city)
+                longitude, latitude = getLonLat(self.gmaps, city)
             except:
                 hermes.publish_start_session_notification(intent_message.site_id, "Error finding location", "")
                 return
         elif self.city != '':
-            lon, lat = self.longitude, self.latitude
+            longitude, latitude = self.longitude, self.latitude
         else:
             ## trigger setCity intent
             hermes.publish_continue_session(intent_message.session_id, 'For which place do you want the prices?', ['setCity'])
@@ -157,12 +187,11 @@ class Carburator(object):
             self.getServices_callback(hermes, intent_message)
         elif 'getStationAddress' in coming_intent:
             self.getStationAddress_callback(hermes, intent_message)
-        # more callback and if condition goes here...
 
     # --> Register callback function and start MQTT
     def start_blocking(self):
         with Hermes(MQTT_ADDR) as h:
-            h.subscribe_intents(self.master_intent_callback).subscribe_intent('setOilType', setOilType_callback).start()
+            h.subscribe_intents(self.master_intent_callback).subscribe_intent('setOilType', self.setOilType_callback).start()
 
 if __name__ == "__main__":
     Carburator()
